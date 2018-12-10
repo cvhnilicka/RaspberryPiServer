@@ -2,10 +2,11 @@ const express = require("express");
 const http = require("http");
 const socketio = require("socket.io");
 const axios = require("axios");
-
 const port = process.env.PORT || 8095;
 const index = require("./routes/index");
-
+const scanner = require('local-network-scanner');
+var fs = require("fs");
+// var obj = csv();
 const app = express();
 app.use(index);
 
@@ -13,21 +14,55 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 
-//
-// io.on('connections', socket => {
-//     console.log("New client connected", setInterval(
-//         () => getApiAndEmit(socket),
-//         10000
-//     );
-//     socket.on("disconnect", () => console.log("Client disconnected"));
-// });
+function MyCSV(Fone, Ftwo) {
+    this.name = Fone;
+    this.mac = Ftwo;
+};
+
 
 io.on('connection', function(socket){
     console.log('Client connected');
     setInterval(()=>philipsUpdate(socket), 10000);  // Update Lights every 10 seconds
+    setInterval(()=>localDevicesUpdate(socket), 30000);
     socket.on("disconnect", () => console.log("Client disconnected"));
-        // This event will be emitted from Client when some one add comments.
+    // This event will be emitted from Client when some one add comments.
 });
+
+
+const localDevicesUpdate = async socket => {
+    var known_devices = {};
+
+    var contents = JSON.parse(fs.readFileSync('./known-hosts.json', 'utf8'));
+    for (var l in contents) {
+        if (contents.hasOwnProperty(l)) {
+            known_devices[contents[l]] = l;
+
+        }
+    }
+
+    // console.log(known_devices)
+
+    var ret_devices = [];
+    scanner.scan({arguments: ["-I", "en0"]}, devices => {
+        var i = 0;
+        // console.log(Object.values(known_devices))
+        devices.forEach(function(a){
+            if (Object.keys(known_devices).indexOf(a['mac'].toUpperCase()) > -1) {
+                // console.log(Object.keys(known_devices)[i])
+                // console.log("FOUND")
+                ret_devices.push(known_devices[a['mac'].toUpperCase()]);
+            }
+            i++;
+        })
+        // console.log(ret_devices);
+        console.log("local-devices");
+        var localUnique = ret_devices.filter(function(elem, pos) {
+            return ret_devices.indexOf(elem) == pos;
+        })
+        socket.emit("local-devices-update", localUnique);
+    });
+}
+
 
 const philipsUpdate = async socket => {
     try {
@@ -56,8 +91,6 @@ const philipsUpdate = async socket => {
         console.error(`Error: ${error.code}`);
     }
 }
-
-
 
 
 const getApiAndEmit = async socket => {

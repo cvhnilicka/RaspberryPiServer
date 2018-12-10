@@ -39,17 +39,6 @@ class Philips extends Component {
               </div>
             : <p> Loading.... </p> }
             </div>
-            // { response
-                // ?
-                // <article></article>
-            //     <p>
-            //     { "Bedroom light: " + response['Bedroom light']['on'] +
-            // "\nBathroom light: " + response['Bathroom light']['on'] +
-            //     "\nKitchen: " + response['kitchen']['on'] +
-            //     "\nliving room: " + response['living room']['on']}
-            //     </p>
-                // : <p> Trouble loading </p> }
-
         );
     }
 }

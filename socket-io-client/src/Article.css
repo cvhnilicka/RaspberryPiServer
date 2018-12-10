@@ -1,13 +1,14 @@
 /* Article (Component) */
 .article {
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   background: white;
   margin: 20px 20px;
   padding: 20px;
   border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(#000, 0.2);
   cursor: pointer;
   transition: 0.3s ease;
   border: solid;
+  /* Add shadows to create the "card" effect */
 
 }
 
